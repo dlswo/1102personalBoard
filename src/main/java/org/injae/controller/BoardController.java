@@ -5,6 +5,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import javax.servlet.http.Cookie;
+
 import org.injae.domain.Board;
 import org.injae.domain.BoardAttachVO;
 import org.injae.domain.Param;
@@ -12,8 +14,10 @@ import org.injae.service.BoardService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +36,7 @@ public class BoardController {
 	
 	private BoardService service;
 	
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/list")
 	public void list(@ModelAttribute("pageObj") Param param, Model model) {
 		
@@ -52,7 +57,7 @@ public class BoardController {
 		
 		log.info("==============================");
 		
-		log.info("register!!");
+		log.info("register!!" + board);
 		
 		if(board.getAttachList() != null) {
 			board.getAttachList().forEach(attach -> log.info(attach));
@@ -65,15 +70,32 @@ public class BoardController {
 		return "redirect:/board/list";
 	}
 	
-	@GetMapping({"/read","/modify"})
-	public void read(@ModelAttribute("pageObj") Param param, Model model) {
+	@GetMapping("/read")
+	public void read(@ModelAttribute("pageObj") Param param, Model model, @CookieValue(value="views",required=false)String cookie) {
+		log.info("-------1");
+		if(cookie == null) {
+			log.info("-------2");
+			service.updateViews(param);
+		}else if(!cookie.contains(param.getBno()+"")){
+			log.info("-------3");
+			service.updateViews(param);
+		}
+		
+		log.info("-------4");
+		model.addAttribute("board", service.read(param));
+		
+	}
+	
+	@GetMapping("/modify")
+	public void modify(@ModelAttribute("pageObj") Param param, Model model) {
 		
 		model.addAttribute("board", service.read(param));
 		
 	}
 	
+	@PreAuthorize("principal.vo.username == #writer")
 	@PostMapping("/remove")
-	public String remove(@ModelAttribute("pageObj") Param param, RedirectAttributes rttr) {
+	public String remove(@ModelAttribute("pageObj") Param param, RedirectAttributes rttr, String writer) {
 		
 		List<BoardAttachVO> attachList = service.getAttachList(param);
 		
@@ -84,6 +106,7 @@ public class BoardController {
 		return param.getLink("redirect:/board/list");
 	}
 	
+	@PreAuthorize("principal.vo.username == #board.writer")
 	@PostMapping("/modify")
 	public String modify(@ModelAttribute("pageObj") Param param, Board board, RedirectAttributes rttr) {
 		

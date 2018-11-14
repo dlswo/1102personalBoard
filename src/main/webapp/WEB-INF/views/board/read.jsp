@@ -1,6 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@include file="../includes/header.jsp"%>
 <style>
 .uploadResult {
@@ -102,7 +101,12 @@
 								</div>
 							</div>
 							<button class="btn btn-success pull-right List">리스트로 가기</button>
-							<button class="btn btn-info pull-right Modify">수정하기</button>
+							<sec:authentication property="principal" var="pinfo"/>
+								<sec:authorize access="isAuthenticated()">
+									<c:if test="${pinfo.vo.username eq board.writer}">
+										<button class="btn btn-info pull-right Modify">수정하기</button>	
+									</c:if>
+								</sec:authorize>							
 							<div class="clearfix"></div>
 					</div>
 				</div>
@@ -113,7 +117,9 @@
 				<div class="card">
 					<div class="card-header card-header-primary">
 						<h4 class="card-title"><i class="material-icons">comment</i>  댓글</h4>
-						<button id='addReplyBtn' class='btn btn-primary btn-round pull-right'><i class="material-icons">add_comment</i></button>
+						<sec:authorize access="isAuthenticated()">
+							<button id='addReplyBtn' class='btn btn-primary btn-round pull-right'><i class="material-icons">add_comment</i></button>
+						</sec:authorize>
 					</div>
 					<div class="card-body">
 						<ul class="chat">
@@ -144,7 +150,7 @@
 	            </div>
 	            <div class="form-group">
 	                <label>댓글러</label>
-	                <input class="form-control" name="replyer" value="replyer">
+	                <input type="text" class="form-control" name="replyer" value="replyer">
 	            </div>
 	            <div class="form-group">
 	                <label>댓글 등록일</label>
@@ -177,6 +183,10 @@
 	<div class="bigPicture">
 	</div>
 </div>
+
+<sec:authorize access="isAuthenticated()">
+<input type='hidden' id='nickname'  value='<sec:authentication property="principal.vo.username" />'> 
+</sec:authorize>
 
 <%@include file="../includes/footer.jsp"%>
 </body>
@@ -325,12 +335,26 @@ $(document).ready(function(){
 	
 	var modalRegBtn = $("#modalRegBtn");
 	var modalModBtn = $("#modalModBtn");
-	var modalRemoveBtn = $("#modalRemoveBtn");	
+	var modalRemoveBtn = $("#modalRemoveBtn");
+	
+	var replyer = null;
+	
+	<sec:authorize access="isAuthenticated()">
+	
+	replyer = $("#nickname").val();
+	
+	</sec:authorize>
+	
+	
+	//csrf
+	var csrfHeaderName = "${_csrf.headerName}";
+	var csrfTokenValue = "${_csrf.token}"
 	
 	//reply modalshow
 	$("#addReplyBtn").on("click", function(e){
 		
 		modal.find("input").val("");
+		modalInputReplyer.val(replyer).attr("disabled", true);
 		modalInputReplyDate.closest("div").hide();
 		modal.find("button[id != modalCloseBtn]").hide();
 		
@@ -338,6 +362,10 @@ $(document).ready(function(){
 		
 		modal.modal("show");
 		
+	});
+	
+	$(document).ajaxSend(function(e, xhr, options) {
+		xhr.setRequestHeader(csrfHeaderName, csrfTokenValue);
 	});
 	
 	//reply register
@@ -367,7 +395,7 @@ $(document).ready(function(){
 		var rno = $(this).data("rno");
 		
 		replyService.get(rno, function(reply){
-			
+			console.log(reply.replyer);
 			modalInputReply.val(reply.reply);
 			modalInputReplyer.val(reply.replyer).attr("disabled", true);
 			modalInputReplyDate.val(replyService.displayTime(reply.replydate)).attr("disabled", true);
@@ -386,10 +414,27 @@ $(document).ready(function(){
 	//reply modify
 	modalModBtn.on("click", function(e){
 		
+		var originalReplyer = modalInputReplyer.val();
+		
 		var reply = {
 				rno: modal.data("rno"),
-				reply: modalInputReply.val()
+				reply: modalInputReply.val(),
+				replyer: originalReplyer
 		};
+		
+		if(!replyer){
+			alert("로그인 후 수정이 가능합니다.");
+			modal.modal("hide");
+			return;
+		}
+		
+		console.log("Original Replyer: "+ originalReplyer);
+		
+		if(replyer != originalReplyer){
+			alert("자신이 작성한 댓글만 수정이 가능합니다.");
+			modal.modal("hide");
+			return;
+		}
 		
 		replyService.update(reply, function(result){
 			
@@ -406,7 +451,27 @@ $(document).ready(function(){
 		
 		var rno = modal.data("rno");
 		
-		replyService.remove(rno, function(result){
+		if(!replyer){
+			
+			alert("로그인 후 삭제가 가능합니다.");
+			modal.modal("hide");
+			return;
+			
+		}
+		
+		var originalReplyer = modalInputReplyer.val();
+		
+		console.log("Original Replyer: " + originalReplyer);
+		
+		if(replyer != originalReplyer){
+			
+			alert("자신이 작성한 댓글만 삭제가 가능합니다.");
+			modal.modal("hide");
+			return;
+			
+		}
+		
+		replyService.remove(rno, originalReplyer, function(result){
 			
 			alert(result);
 			modal.modal("hide");

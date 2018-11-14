@@ -1,6 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@include file="../includes/header.jsp"%>
 <style>
 .uploadResult {
@@ -66,7 +65,7 @@
 							<div class="col-md-12">
 								<div class="form-group">
 									<label class="bmd-label-floating">글쓴이</label> <input
-										type="text" class="form-control" name="writer" value='<c:out value="${board.writer}" />'>
+										type="text" class="form-control" name="writer" value='<c:out value="${board.writer}" />' disabled="disabled">
 								</div>
 							</div>
 						</div>
@@ -105,8 +104,13 @@
 							</div>
 						</div>
 						<button type="submit" class="btn btn-success pull-right List">리스트로 가기</button>
-						<button type="submit" class="btn btn-danger pull-right Remove">삭제하기</button>
-						<button type="submit" class="btn btn-info pull-right Modify">수정하기</button>
+						<sec:authentication property="principal" var="pinfo"/>
+							<sec:authorize access="isAuthenticated()">
+								<c:if test="${pinfo.vo.username eq board.writer}">
+									<button type="submit" class="btn btn-danger pull-right Remove">삭제하기</button>
+									<button type="submit" class="btn btn-info pull-right Modify">수정하기</button>
+								</c:if>
+							</sec:authorize>
 						<div class="clearfix"></div>
 					</div>
 				</div>
@@ -120,6 +124,7 @@
 	<input type='hidden' name='size' value='${pageObj.size}'>
 	<input type='hidden' name='type' value='${pageObj.type}'>
 	<input type='hidden' name='keyword' value='${pageObj.keyword}'>
+	<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
 </form>
 
 <div class="bigPictureWrapper">
@@ -289,6 +294,9 @@ $(document).ready(function(){
 			url: '/upload',
 			processData: false,
 			contentType: false,
+			beforeSend: function(xhr) {
+				xhr.setRequestHeader(csrfHeaderName, csrfTokenValue);
+			},
 			data: formData,
 			type: 'post',
 			dataType: 'json',
@@ -331,6 +339,10 @@ $(document).ready(function(){
 		});
 		uploadUL.append(str);		
 	}
+	
+	//csrf
+	var csrfHeaderName = "${_csrf.headerName}";
+	var csrfTokenValue = "${_csrf.token}"
 	
 });
 </script>

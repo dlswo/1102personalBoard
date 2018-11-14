@@ -1,5 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,7 +12,7 @@
   <link rel="icon" type="image/png" href="/resources/assets/img/favicon.png">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <title>
-    Material Dashboard Dark Edition by Creative Tim
+    Material Dashboard Dark Edition by InJae
   </title>
   <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
   <!--     Fonts and icons     -->
@@ -127,12 +130,22 @@
                 </div>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="javascript:void(0)">
-                  <i class="material-icons">person</i>
+              <sec:authorize access="isAuthenticated()">
+                <a class="nav-link" href="/customLogout">
+                <i class="material-icons">person_outline</i>
                   <p class="d-lg-none d-md-block">
                     Account
                   </p>
                 </a>
+              </sec:authorize>
+              <sec:authorize access="isAnonymous()">
+                <a class="nav-link" href="/customLogin">
+                <i class="material-icons">person</i>
+                  <p class="d-lg-none d-md-block">
+                    Account
+                  </p>
+                </a>
+              </sec:authorize>
               </li>
             </ul>
           </div>

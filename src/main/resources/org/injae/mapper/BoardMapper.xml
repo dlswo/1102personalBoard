@@ -45,12 +45,15 @@
   </sql>
   
   <select id="getList" resultType="org.injae.domain.Board">
-  	select * from tbl_board 
+  	select board.bno, title, writer, content, regdate, board.updatedate, del, views, likes, hates, count(reply) replyCnt
+  	 from tbl_board board left outer join tbl_reply reply
+  	 on board.bno = reply.bno
   	where 1=1
   	<include refid="search"></include>
   	and del = 'N'
-  	and bno > (select max(bno) - 10000 from tbl_board)
-  	order by bno desc limit #{skip}, #{size}
+  	and board.bno > (select max(bno) - 10000 from tbl_board)
+  	group by board.bno
+  	order by board.bno desc limit #{skip}, #{size}  	
   </select>
   
   <select id="count" resultType="int">
@@ -60,7 +63,8 @@
   	and bno > (select max(bno) - 10000 from tbl_board)
   </select>
   
-	<select id="getCountByBno" resultType="int">
-  		select count(rno) from tbl_reply where bno = #{bno}
-  	</select>
+  <update id="updateViews">
+  	update tbl_board set views=views+1 where bno = #{bno}
+  </update>
+  
 </mapper>

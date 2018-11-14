@@ -15,6 +15,10 @@
 		<level value="info" />
 	</logger>
 	
+	<logger name="org.injae.security">
+		<level value="info" />
+	</logger>
+	
 	<!-- 3rdparty Loggers -->
 	<logger name="org.springframework.core">
 		<level value="info" />
@@ -31,6 +35,11 @@
 	<logger name="org.springframework.web">
 		<level value="info" />
 	</logger>
+	
+	<logger name="org.springframework.security">
+		<level value="info" />
+	</logger>
+	
 
 	<!-- Root Logger -->
 	<root>

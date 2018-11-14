@@ -7,6 +7,6 @@ import org.injae.domain.Param;
 
 public interface BoardMapper extends CommonMapper<Board, Param> {
 	
-
-
+	public int updateViews(Param param);
+	
 }

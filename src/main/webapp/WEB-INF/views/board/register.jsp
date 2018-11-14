@@ -66,7 +66,7 @@
 							<div class="col-md-12">
 								<div class="form-group">
 									<label class="bmd-label-floating">글쓴이</label> <input
-										type="text" class="form-control" name="writer">
+										type="text" class="form-control" name="writer" value='<sec:authentication property="principal.vo.username" />' disabled="disabled">
 								</div>
 							</div>
 						</div>
@@ -115,6 +115,7 @@
 </div>
 
 <form id="actionForm">
+<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
 </form>
 
 <div class="bigPictureWrapper">
@@ -181,6 +182,7 @@ $(document).ready(function(){
 		
 	});
 	
+	//move list
 	$(".cancel").on("click", function(e){
 		e.preventDefault();
 		
@@ -230,6 +232,9 @@ $(document).ready(function(){
 			url: '/upload',
 			processData: false,
 			contentType: false,
+			beforeSend: function(xhr) {
+				xhr.setRequestHeader(csrfHeaderName, csrfTokenValue);
+			},
 			data: formData,
 			type: 'post',
 			dataType: 'json',
@@ -285,6 +290,9 @@ $(document).ready(function(){
 		$.ajax({
 			url: '/deleteFile',
 			data: {filename : targetFile, type: type},
+			beforeSend: function(xhr) {
+				xhr.setRequestHeader(csrfHeaderName, csrfTokenValue);
+			},
 			dataType: 'text',
 			type: 'post',
 			success: function(result){
@@ -294,11 +302,11 @@ $(document).ready(function(){
 		})
 	})
 	
-	$(".uploadResult").on("click", "li",function(e){
+	$(".uploadResult").on("click", "img",function(e){
 		
 		console.log("view image")
 		
-		var liObj = $(this);
+		var liObj = $(this).closest("li");
 		
 		var path = encodeURIComponent( liObj.data("path") + "/" + liObj.data("uuid") + "_" + liObj.data("filename"));
 		
@@ -327,6 +335,10 @@ $(document).ready(function(){
 		}, 1000);
 		
 	});
+	
+	//csrf
+	var csrfHeaderName = "${_csrf.headerName}";
+	var csrfTokenValue = "${_csrf.token}"
 	
 });
 </script>

@@ -8,10 +8,11 @@ import lombok.Data;
 @Data
 public class Board {
 	
-	private Integer bno;
+	private Integer bno, views, likes, hates;
 	private String title, content, writer, del;
 	private Date regdate, updatedate;
 	
 	private List<BoardAttachVO> attachList;
+	private int replyCnt;
 	
 }

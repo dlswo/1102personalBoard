@@ -3,7 +3,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:context="http://www.springframework.org/schema/context"
-	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
@@ -20,14 +22,26 @@
 		<beans:property name="prefix" value="/WEB-INF/views/" />
 		<beans:property name="suffix" value=".jsp" />
 	</beans:bean>
+
+	<beans:bean id="multipartResolver"
+		class="org.springframework.web.multipart.support.StandardServletMultipartResolver">
+	</beans:bean>
+
+	
+	<beans:bean id="checkInter" 
+		class="org.injae.interceptor.CheckLoginInterceptor">
+	</beans:bean>
+	
+	<interceptors>
+		<interceptor>
+			<mapping path="/board/read" />
+			<beans:ref bean="checkInter" />
+		</interceptor>
+	</interceptors>
 	
 	<context:component-scan base-package="org.injae.controller" />
 	<context:component-scan base-package="org.injae.service"/>
 	
-	<beans:bean id="multipartResolver" 
-	class="org.springframework.web.multipart.support.StandardServletMultipartResolver">
-	</beans:bean>
-	
-	
+	<security:global-method-security pre-post-annotations="enabled" secured-annotations="enabled"/>
 	
 </beans:beans>

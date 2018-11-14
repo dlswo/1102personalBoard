@@ -95,5 +95,11 @@ public class BoardServiceImpl implements BoardService {
 	public List<BoardAttachVO> getAttachList(Param param) {
 		return attachMapper.findByBno(param);
 	}
+
+	@Override
+	public int updateViews(Param param) {
+		return mapper.updateViews(param);
+	}
+	
 	
 }

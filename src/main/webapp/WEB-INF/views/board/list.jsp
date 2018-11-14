@@ -1,7 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <%@include file="../includes/header.jsp"%>
 <div class="content">
 	<div class="container-fluid">
@@ -28,15 +26,17 @@
 									<th>글쓴이</th>
 									<th>등록일</th>
 									<th>수정일</th>
+									<th>조회수</th>
 								</thead>
 								<tbody>
 									<c:forEach items="${list}" var="board">
 										<tr>
 											<td><c:out value="${board.bno}" /></td>
-											<td><a href='${board.bno }' class='board'><c:out value="${board.title}" /></a></td>
+											<td><a href='${board.bno }' class='board'><c:out value="${board.title}" /> </a><c:out value="[${board.replyCnt}]" /></td>
 											<td><c:out value="${board.writer}" /></td>
 											<td><fmt:formatDate value="${board.regdate}" pattern="MM-dd HH:mm" /></td>
 											<td><fmt:formatDate value="${board.updatedate}" pattern="MM-dd HH:mm" /></td>
+											<td><c:out value="${board.views}"/></td>
 										</tr>
 									</c:forEach>
 								</tbody>
